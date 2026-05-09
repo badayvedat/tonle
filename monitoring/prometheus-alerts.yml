@@ -1,0 +1,82 @@
+groups:
+  - name: tonle.production
+    rules:
+      - alert: TonleSustained5xx
+        expr: |
+          sum(rate(tonle_requests_total{status=~"5.."}[10m]))
+          /
+          clamp_min(sum(rate(tonle_requests_total[10m])), 0.001) > 0.02
+        for: 10m
+        labels:
+          severity: page
+          owner: platform-oncall
+        annotations:
+          summary: "tonle 5xx rate is elevated"
+          description: "More than 2% of tonle requests have returned 5xx for 10 minutes."
+          runbook: "RUNBOOKS.md#redis-outage"
+
+      - alert: TonleRedisUnavailable
+        expr: increase(tonle_readiness_failures_total[5m]) > 0
+        for: 5m
+        labels:
+          severity: page
+          owner: platform-oncall
+        annotations:
+          summary: "tonle readiness is failing"
+          description: "The app has reported Redis readiness failures in the last 5 minutes."
+          runbook: "RUNBOOKS.md#redis-outage"
+
+      - alert: TonleRedisErrors
+        expr: increase(tonle_redis_errors_total[10m]) > 5
+        for: 10m
+        labels:
+          severity: page
+          owner: platform-oncall
+        annotations:
+          summary: "tonle Redis command failures are elevated"
+          description: "The app has observed more than 5 Redis/backend errors in 10 minutes."
+          runbook: "RUNBOOKS.md#redis-outage"
+
+      - alert: TonleHighAuthDenialRate
+        expr: increase(tonle_auth_denials_total[10m]) > 100
+        for: 10m
+        labels:
+          severity: ticket
+          owner: platform-oncall
+        annotations:
+          summary: "tonle auth denials are elevated"
+          description: "More than 100 auth denials occurred in 10 minutes."
+          runbook: "RUNBOOKS.md#token-compromise"
+
+      - alert: TonleHighTrimGapRate
+        expr: increase(tonle_trim_gaps_total[10m]) > 20
+        for: 10m
+        labels:
+          severity: ticket
+          owner: platform-oncall
+        annotations:
+          summary: "tonle trim gaps are elevated"
+          description: "More than 20 trim-gap events occurred in 10 minutes."
+          runbook: "RUNBOOKS.md#high-trim-gap-rate"
+
+      - alert: TonleSseConnectionSaturation
+        expr: tonle_sse_connections_active > 800
+        for: 10m
+        labels:
+          severity: ticket
+          owner: platform-oncall
+        annotations:
+          summary: "tonle active SSE connections are near capacity"
+          description: "Active SSE connections exceeded the initial saturation threshold for 10 minutes."
+          runbook: "RUNBOOKS.md#high-sse-connection-count"
+
+      - alert: TonleSseConnectionLimitRejections
+        expr: increase(tonle_connection_limit_rejections_total{kind="sse"}[10m]) > 0
+        for: 5m
+        labels:
+          severity: ticket
+          owner: platform-oncall
+        annotations:
+          summary: "tonle is rejecting SSE connections"
+          description: "SSE connection-limit rejections occurred in the last 10 minutes."
+          runbook: "RUNBOOKS.md#high-sse-connection-count"

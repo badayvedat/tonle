@@ -1,0 +1,250 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [
+    {
+      "title": "Runbooks",
+      "type": "link",
+      "url": "../RUNBOOKS.md"
+    }
+  ],
+  "panels": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "targets": [
+        {
+          "expr": "sum by (route, method, status) (rate(tonle_requests_total[5m]))",
+          "legendFormat": "{{method}} {{route}} {{status}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Request Rate",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 2,
+      "targets": [
+        {
+          "expr": "sum(rate(tonle_requests_total{status=~\"5..\"}[5m])) / clamp_min(sum(rate(tonle_requests_total[5m])), 0.001)",
+          "legendFormat": "5xx ratio",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(tonle_requests_total{status=~\"4..\"}[5m])) / clamp_min(sum(rate(tonle_requests_total[5m])), 0.001)",
+          "legendFormat": "4xx ratio",
+          "refId": "B"
+        }
+      ],
+      "title": "Error Rate",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "id": 3,
+      "targets": [
+        {
+          "expr": "sum by (route, method) (rate(tonle_request_duration_seconds_sum[5m])) / clamp_min(sum by (route, method) (rate(tonle_request_duration_seconds_count[5m])), 0.001)",
+          "legendFormat": "{{method}} {{route}} avg",
+          "refId": "A"
+        }
+      ],
+      "title": "Average Request Latency",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "id": 4,
+      "targets": [
+        {
+          "expr": "tonle_sse_connections_active",
+          "legendFormat": "SSE active",
+          "refId": "A"
+        },
+        {
+          "expr": "tonle_polls_active",
+          "legendFormat": "long polls active",
+          "refId": "B"
+        }
+      ],
+      "title": "Active Listeners",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "id": 5,
+      "targets": [
+        {
+          "expr": "increase(tonle_redis_errors_total[5m])",
+          "legendFormat": "Redis errors",
+          "refId": "A"
+        },
+        {
+          "expr": "increase(tonle_readiness_failures_total[5m])",
+          "legendFormat": "readiness failures",
+          "refId": "B"
+        }
+      ],
+      "title": "Redis Health",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 16
+      },
+      "id": 6,
+      "targets": [
+        {
+          "expr": "increase(tonle_auth_denials_total[5m])",
+          "legendFormat": "auth denials",
+          "refId": "A"
+        },
+        {
+          "expr": "increase(tonle_trim_gaps_total[5m])",
+          "legendFormat": "trim gaps",
+          "refId": "B"
+        },
+        {
+          "expr": "sum by (kind) (increase(tonle_rate_limit_rejections_total[5m]))",
+          "legendFormat": "rate limits {{kind}}",
+          "refId": "C"
+        },
+        {
+          "expr": "sum by (kind) (increase(tonle_connection_limit_rejections_total[5m]))",
+          "legendFormat": "connection limits {{kind}}",
+          "refId": "D"
+        }
+      ],
+      "title": "Operational Rejections",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "tags": [
+    "tonle",
+    "production"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "text": "Prometheus",
+          "value": "Prometheus"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Prometheus",
+        "multi": false,
+        "name": "DS_PROMETHEUS",
+        "options": [],
+        "query": "prometheus",
+        "refresh": 1,
+        "regex": "",
+        "type": "datasource"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timezone": "browser",
+  "title": "tonle Production",
+  "uid": "tonle-production",
+  "version": 1,
+  "weekStart": ""
+}

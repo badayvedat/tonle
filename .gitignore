@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.py[cod]
+*.rdb
+uv.lock
+.pytest_cache
+.claude

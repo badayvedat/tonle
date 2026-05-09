@@ -1,0 +1,15 @@
+.claude/
+.git/
+.jj/
+.pytest_cache/
+.venv/
+__pycache__/
+*.py[cod]
+.DS_Store
+
+tests/
+examples/
+thoughts/
+
+Dockerfile
+fly.toml
